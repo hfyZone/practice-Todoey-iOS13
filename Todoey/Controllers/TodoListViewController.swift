@@ -11,17 +11,16 @@ import UIKit
 class TodoListViewController: UITableViewController {
 
     //拟定三个备忘字符串
-    var itemArray = ["起床", "做早饭吃早饭", "工作"]
+    //对象数组的声明方式
+    var itemArray = [Item]()
     
     let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //查询uD，如果uD存储所需数据，则直接赋值
-        if let items = defaults.array(forKey: "ToDoListArray") as? [String] {
-            itemArray = items
-        }
-        
+        let newItem = Item()
+        newItem.title = "起床"
+        itemArray.append(newItem)
     }
     
     //MARK: - TableView的数据源方法
@@ -31,8 +30,18 @@ class TodoListViewController: UITableViewController {
     }
     //根据IndexPath生成cell并返回给TV
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        /*
+         弃用以下可重用cell，会导致超出视口的cell被用作新进入视口的cell
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        cell.textLabel?.text = itemArray[indexPath.row]//TODO: cell.textLabel已标记弃用，学习UIListContentConfiguration
+        使用以下自定义cell,解决以上问题，但是离开视口的cell被销毁，如果被选中的cell再次出现是为选中状态
+         因此需要将 选中状态（C） 和 数据（M） 关联起来，而不是 选中状态（C） 和 cell（V） 关联起来。
+         */
+        let cell = UITableViewCell(style: .default, reuseIdentifier: "ToDoItemCell")
+        //TODO: cell.textLabel已标记弃用，学习UIListContentConfiguration
+        cell.textLabel?.text = itemArray[indexPath.row].title
+        //根据Model状态确定View状态
+        cell.accessoryType = itemArray[indexPath.row].done ? .checkmark : .none
+        
         return cell
     }
     
@@ -40,12 +49,17 @@ class TodoListViewController: UITableViewController {
     //TV的用户交互row委托方法
     //当用户对tableView的indexPath的cell进行点击操作触发的方法
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //print(itemArray[indexPath.row])
+        //根据索引确定当前交互的Model数据更改
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        //以下被取消因为View的状态变更已经与用户动作无直接关系，而是用户修改数据、数据影响View的间接关系，因此此部分逻辑移到数据渲染的方法中
+        //指定tv当前的cell的标记符号为选中/取消选中
+//        let currentCell = tableView.cellForRow(at: indexPath)
+//        currentCell?.accessoryType = currentCell?.accessoryType == .checkmark ? .none : .checkmark
+        
+        //在每次用户交互完后要主动触发数据M与页面V的交互
+        tableView.reloadData()
         //设置tv的当前行取消被选中状态，以实现选中动画
         tableView.deselectRow(at: indexPath, animated: true)
-        //指定tv当前的cell的标记符号为选中/取消选中
-        let currentCell = tableView.cellForRow(at: indexPath)
-        currentCell?.accessoryType = currentCell?.accessoryType == .checkmark ? .none : .checkmark
     }
     
     //MARK: - 新增项目
@@ -57,8 +71,10 @@ class TodoListViewController: UITableViewController {
         //新建一个alert的action（按钮），在回调函数中确定用户点击”增加“按钮的时候的行动
         let action = UIAlertAction(title: "增加", style: .default){
             (action) in
+            let newItem = Item()
+            newItem.title = textField.text!
             //将新增备忘录加入备忘录列表中
-            self.itemArray.append(textField.text!)
+            self.itemArray.append(newItem)
             
             //将备忘录列表存入用户默认内存中
             self.defaults.set(self.itemArray, forKey: "ToDoListArray")
