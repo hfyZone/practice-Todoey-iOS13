@@ -13,9 +13,15 @@ class TodoListViewController: UITableViewController {
     //拟定三个备忘字符串
     var itemArray = ["起床", "做早饭吃早饭", "工作"]
     
+    let defaults = UserDefaults.standard
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        //查询uD，如果uD存储所需数据，则直接赋值
+        if let items = defaults.array(forKey: "ToDoListArray") as? [String] {
+            itemArray = items
+        }
+        
     }
     
     //MARK: - TableView的数据源方法
@@ -53,6 +59,10 @@ class TodoListViewController: UITableViewController {
             (action) in
             //将新增备忘录加入备忘录列表中
             self.itemArray.append(textField.text!)
+            
+            //将备忘录列表存入用户默认内存中
+            self.defaults.set(self.itemArray, forKey: "ToDoListArray")
+            
             //触发tv的数据渲染流程
             self.tableView.reloadData()
             
