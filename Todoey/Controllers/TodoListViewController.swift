@@ -25,9 +25,8 @@ class TodoListViewController: UITableViewController {
         super.viewDidLoad()
 
         
-        let newItem = Item()
-        newItem.title = "起床"
-        itemArray.append(newItem)
+        
+        loadItems()
     }
     
     //MARK: - TableView的数据源方法
@@ -101,7 +100,7 @@ class TodoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    //MARK: - 什么数据
+    //MARK: - 保存读取数据
     func saveItems(){
         //将备忘录列表存入用户默认内存中
         //在itemArray为对象列表时会报错因为UD不接受
@@ -121,6 +120,19 @@ class TodoListViewController: UITableViewController {
         
         //触发tv的数据渲染流程
         self.tableView.reloadData()
+    }
+    
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do{
+                //decode方法需要类型参数，Item数组表示方法为[Item].self
+                itemArray = try decoder.decode([Item].self, from: data)
+            }catch{
+                print("Error decoding Items: \(error)")
+            }
+            
+        }
     }
     
     
