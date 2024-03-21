@@ -14,10 +14,17 @@ class TodoListViewController: UITableViewController {
     //对象数组的声明方式
     var itemArray = [Item]()
     
-    let defaults = UserDefaults.standard
+    //let defaults = UserDefaults.standard
+    
+    /* userDomainMask指此处保存本应用的个人数据
+     Optional(file:///Users/hanfeiyang/Library/Developer/CoreSimulator/Devices/F9F07048-A738-4773-861F-20E4EBA8C802/data/Containers/Data/Application/610C73A6-9678-4AA2-A0A6-1F333D277DB3/Documents/)
+     */
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        
         let newItem = Item()
         newItem.title = "起床"
         itemArray.append(newItem)
@@ -56,8 +63,10 @@ class TodoListViewController: UITableViewController {
 //        let currentCell = tableView.cellForRow(at: indexPath)
 //        currentCell?.accessoryType = currentCell?.accessoryType == .checkmark ? .none : .checkmark
         
+        //用户修改选中状态后同样要更新Items
+        saveItems()
         //在每次用户交互完后要主动触发数据M与页面V的交互
-        tableView.reloadData()
+        //tableView.reloadData()
         //设置tv的当前行取消被选中状态，以实现选中动画
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -76,11 +85,8 @@ class TodoListViewController: UITableViewController {
             //将新增备忘录加入备忘录列表中
             self.itemArray.append(newItem)
             
-            //将备忘录列表存入用户默认内存中
-            self.defaults.set(self.itemArray, forKey: "ToDoListArray")
+            self.saveItems()
             
-            //触发tv的数据渲染流程
-            self.tableView.reloadData()
             
         }
         //为alert装载一个输入框,并将闭包内输入框状态传至方法内的输入框（引用传递)
@@ -93,6 +99,28 @@ class TodoListViewController: UITableViewController {
         alert.addAction(action)
         //触发alert
         present(alert, animated: true, completion: nil)
+    }
+    
+    //MARK: - 什么数据
+    func saveItems(){
+        //将备忘录列表存入用户默认内存中
+        //在itemArray为对象列表时会报错因为UD不接受
+        //self.defaults.set(self.itemArray, forKey: "ToDoListArray")
+        
+        /*
+         使用本地文件的方式，用encoder编码数据，可以存储形式更丰富
+         */
+        let encoder = PropertyListEncoder()
+        do{
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Error encode array \(error)")
+        }
+        
+        
+        //触发tv的数据渲染流程
+        self.tableView.reloadData()
     }
     
     
