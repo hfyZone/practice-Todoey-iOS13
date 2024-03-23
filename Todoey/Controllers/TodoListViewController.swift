@@ -7,26 +7,26 @@
 //
 
 import UIKit
-
+import CoreData
 class TodoListViewController: UITableViewController {
 
     //拟定三个备忘字符串
     //对象数组的声明方式
     var itemArray = [Item]()
-    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     //let defaults = UserDefaults.standard
     
     /* userDomainMask指此处保存本应用的个人数据
      Optional(file:///Users/hanfeiyang/Library/Developer/CoreSimulator/Devices/F9F07048-A738-4773-861F-20E4EBA8C802/data/Containers/Data/Application/610C73A6-9678-4AA2-A0A6-1F333D277DB3/Documents/)
      */
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+   
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+        print(dataFilePath)
         
-        
-        loadItems()
+//        ßloadItems()
     }
     
     //MARK: - TableView的数据源方法
@@ -79,8 +79,12 @@ class TodoListViewController: UITableViewController {
         //新建一个alert的action（按钮），在回调函数中确定用户点击”增加“按钮的时候的行动
         let action = UIAlertAction(title: "增加", style: .default){
             (action) in
-            let newItem = Item()
+            //使用CoreData提供的Item类
+
+            let newItem = Item(context: self.context)
             newItem.title = textField.text!
+            //done属性不可为空
+            newItem.done = false
             //将新增备忘录加入备忘录列表中
             self.itemArray.append(newItem)
             
@@ -106,34 +110,27 @@ class TodoListViewController: UITableViewController {
         //在itemArray为对象列表时会报错因为UD不接受
         //self.defaults.set(self.itemArray, forKey: "ToDoListArray")
         
-        /*
-         使用本地文件的方式，用encoder编码数据，可以存储形式更丰富
-         */
-        let encoder = PropertyListEncoder()
         do{
-            let data = try encoder.encode(itemArray)
-            try data.write(to: dataFilePath!)
+            try context.save()
         } catch {
-            print("Error encode array \(error)")
+           print("Error saving context \(error)")
         }
-        
-        
         //触发tv的数据渲染流程
         self.tableView.reloadData()
     }
     
-    func loadItems() {
-        if let data = try? Data(contentsOf: dataFilePath!) {
-            let decoder = PropertyListDecoder()
-            do{
-                //decode方法需要类型参数，Item数组表示方法为[Item].self
-                itemArray = try decoder.decode([Item].self, from: data)
-            }catch{
-                print("Error decoding Items: \(error)")
-            }
-            
-        }
-    }
+//    func loadItems() {
+//        if let data = try? Data(contentsOf: dataFilePath!) {
+//            let decoder = PropertyListDecoder()
+//            do{
+//                //decode方法需要类型参数，Item数组表示方法为[Item].self
+//                itemArray = try decoder.decode([Item].self, from: data)
+//            }catch{
+//                print("Error decoding Items: \(error)")
+//            }
+//            
+//        }
+//    }
     
     
 
