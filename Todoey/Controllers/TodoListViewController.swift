@@ -51,10 +51,15 @@ class TodoListViewController: UITableViewController {
         return cell
     }
     
-    //MARK: - TableView的用户交互委托方法
+    //MARK: - TableView的用户交互委托方法，备忘录状态变更
     //TV的用户交互row委托方法
     //当用户对tableView的indexPath的cell进行点击操作触发的方法
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        //删除数据
+        //context.delete(itemArray[indexPath.row])
+        //删除view中的cell元素
+        //itemArray.remove(at: indexPath.row)
+        
         //根据索引确定当前交互的Model数据更改
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         //以下被取消因为View的状态变更已经与用户动作无直接关系，而是用户修改数据、数据影响View的间接关系，因此此部分逻辑移到数据渲染的方法中
