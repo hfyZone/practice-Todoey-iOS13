@@ -101,6 +101,8 @@ class TodoListViewController: UITableViewController {
         }catch {
             print("error fetch \(error)")
         }
+        //清理注释的时候误删了！！！
+        tableView.reloadData()
     }
 }
 
@@ -118,5 +120,18 @@ extension TodoListViewController: UISearchBarDelegate{
         //fetch result form db
         loadItems(with: request)
         tableView.reloadData()
+    }
+    //show the origin page if nothing in searchBar
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        if searchBar.text?.count == 0 {
+            loadItems()
+            //用户取消输入时，主线程，消除键盘和搜索框光标
+            DispatchQueue.main.async {
+                //取消选中状态的方法，必须放在主线程里执行，否则不生效
+                searchBar.resignFirstResponder()
+            }
+            
+        }
     }
 }
