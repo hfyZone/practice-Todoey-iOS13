@@ -26,7 +26,7 @@ class TodoListViewController: UITableViewController {
         let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
         print(dataFilePath)
         
-//        ßloadItems()
+        loadItems()
     }
     
     //MARK: - TableView的数据源方法
@@ -119,18 +119,15 @@ class TodoListViewController: UITableViewController {
         self.tableView.reloadData()
     }
     
-//    func loadItems() {
-//        if let data = try? Data(contentsOf: dataFilePath!) {
-//            let decoder = PropertyListDecoder()
-//            do{
-//                //decode方法需要类型参数，Item数组表示方法为[Item].self
-//                itemArray = try decoder.decode([Item].self, from: data)
-//            }catch{
-//                print("Error decoding Items: \(error)")
-//            }
-//            
-//        }
-//    }
+    func loadItems() {
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        do{
+            itemArray = try context.fetch(request)
+        }catch {
+            print("error fetch \(error)")
+        }
+        
+    }
     
     
 
