@@ -24,7 +24,7 @@ class TodoListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
-        print(dataFilePath)
+        //在storyboard连接searchBar和控制器？好像现在xcode自己就做了委托了
         
         loadItems()
     }
@@ -135,7 +135,29 @@ class TodoListViewController: UITableViewController {
     }
     
     
-
- 
 }
 
+//MARK: - 搜索栏
+//每个其他功能实现用extension实现
+extension TodoListViewController: UISearchBarDelegate{
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        //建立用于获取数据库Context的Request
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        //The method is to search the items by a keyword of title
+        //The content of the searchBar will replace %@
+        let predicate = NSPredicate(format: "title CONTAINS %@", searchBar.text!)
+        request.predicate = predicate
+        //set the principle of sort for request
+//        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
+//        request.sortDescriptors = [sortDescriptor]
+        //abb for above two lines
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        //fetch result form db
+        do{
+            itemArray = try context.fetch(request)
+        }catch {
+            print("error fetch \(error)")
+        }
+        tableView.reloadData()
+    }
+}
