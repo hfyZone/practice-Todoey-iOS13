@@ -25,7 +25,8 @@ class TodoListViewController: UITableViewController {
         super.viewDidLoad()
         let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
         //在storyboard连接searchBar和控制器？好像现在xcode自己就做了委托了
-        
+        //let request: NSFetchRequest<Item> = Item.fetchRequest()
+        //use defult request
         loadItems()
     }
     
@@ -123,9 +124,9 @@ class TodoListViewController: UITableViewController {
         //触发tv的数据渲染流程
         self.tableView.reloadData()
     }
-    
-    func loadItems() {
-        let request: NSFetchRequest<Item> = Item.fetchRequest()
+    //load Items by passed parameters, simply all-quiried is defult
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
+        //let request: NSFetchRequest<Item> = Item.fetchRequest()
         do{
             itemArray = try context.fetch(request)
         }catch {
@@ -153,11 +154,13 @@ extension TodoListViewController: UISearchBarDelegate{
         //abb for above two lines
         request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
         //fetch result form db
-        do{
-            itemArray = try context.fetch(request)
-        }catch {
-            print("error fetch \(error)")
-        }
+//        do{
+//            itemArray = try context.fetch(request)
+//        }catch {
+//            print("error fetch \(error)")
+//        }
+        //load Items according to custom request
+        loadItems(with: request)
         tableView.reloadData()
     }
 }
