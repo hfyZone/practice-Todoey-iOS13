@@ -16,7 +16,7 @@ class TodoListViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+//        let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
         //在storyboard连接searchBar和控制器？好像现在xcode自己就做了委托了
         loadItems()
     }
@@ -41,6 +41,7 @@ class TodoListViewController: UITableViewController {
     //TV的用户交互row委托方法
     //当用户对tableView的indexPath的cell进行点击操作触发的方法
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        //TODO: 删除呢？咋没后续了一会看一下。
         //删除数据
         //context.delete(itemArray[indexPath.row])
         //删除view中的cell元素
