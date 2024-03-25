@@ -60,8 +60,18 @@ class CategoryViewController: UITableViewController {
     }
     //MARK: - TableView 交互
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        performSegue(withIdentifier: "goToItems", sender: self)
+        
+        
         //设置tv的当前行取消被选中状态，以实现选中动画
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let destinationVC = segue.destination as! TodoListViewController
+        if let indexPath = tableView.indexPathForSelectedRow {
+            destinationVC.selectedCategory = categoryArray[indexPath.row]
+        }
     }
     //MARK: - 数据操作
     func saveCategories(){

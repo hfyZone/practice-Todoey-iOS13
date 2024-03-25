@@ -12,13 +12,18 @@ class TodoListViewController: UITableViewController {
 
     var itemArray = [Item]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
+    var selectedCategory: Category? {
+        //触发当被设置值时
+        didSet{
+            loadItems()
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
 //        let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
         //在storyboard连接searchBar和控制器？好像现在xcode自己就做了委托了
-        loadItems()
+        //loadItems()
     }
     
     //MARK: - TableView的数据源方法
@@ -69,6 +74,8 @@ class TodoListViewController: UITableViewController {
             newItem.title = textField.text!
             //done属性不可为空
             newItem.done = false
+            //在DM中设置了外键，在ViewDidLoad中接收到了Segue传来的selected Category
+            newItem.parentCategory = self.selectedCategory
             //将新增备忘录加入备忘录列表中
             self.itemArray.append(newItem)
             self.saveItems()
@@ -96,7 +103,17 @@ class TodoListViewController: UITableViewController {
         self.tableView.reloadData()
     }
     //load Items by passed parameters, simply all-quiried is defult
-    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
+    //predicate设置为可选值，默认为空
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
+        //根据当前目录从数据库取数据
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        if let addtionalPredicate = predicate {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, addtionalPredicate])
+        }else{
+            request.predicate = categoryPredicate
+        }
+//        let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, predicate])
+//        request.predicate = predicate
         do{
             itemArray = try context.fetch(request)
         }catch {
@@ -119,7 +136,7 @@ extension TodoListViewController: UISearchBarDelegate{
         //set the principle of sort for request
         request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
         //fetch result form db
-        loadItems(with: request)
+        loadItems(with: request, predicate: predicate)
         tableView.reloadData()
     }
     //show the origin page if nothing in searchBar
