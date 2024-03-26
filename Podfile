@@ -5,5 +5,5 @@ target 'Todoey' do
   use_frameworks!
 
   # Pods for Todoey
-pod 'RealmSwift'
+pod 'RealmSwift','~> 3.0.2'
 end
