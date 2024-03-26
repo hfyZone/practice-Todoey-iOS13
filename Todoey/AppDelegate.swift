@@ -24,6 +24,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
          最终在/Library/Preference下
          */
         //print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! as String)
+        print(Realm.Configuration.defaultConfiguration.fileURL)
+        let data = Data()
+        data.name = "hfy"
+        data.age = 12
+        
+        do {
+            let realm = try Realm()
+            try realm.write {
+                realm.add(data)
+            }
+        } catch {
+            print("Error initialising new realm, \(error)")
+        }
+        
         return true
     }
 
