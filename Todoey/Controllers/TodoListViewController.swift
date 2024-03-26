@@ -15,7 +15,7 @@ class TodoListViewController: UITableViewController {
     var selectedCategory: Category? {
         //触发当被设置值时
         didSet{
-            loadItems()
+            //loadItems()
         }
     }
     
@@ -69,15 +69,15 @@ class TodoListViewController: UITableViewController {
         //新建一个alert的action（按钮），在回调函数中确定用户点击”增加“按钮的时候的行动
         let action = UIAlertAction(title: "增加", style: .default){
             (action) in
-            //使用CoreData提供的Item类
-            let newItem = Item(context: self.context)
-            newItem.title = textField.text!
-            //done属性不可为空
-            newItem.done = false
-            //在DM中设置了外键，在ViewDidLoad中接收到了Segue传来的selected Category
-            newItem.parentCategory = self.selectedCategory
-            //将新增备忘录加入备忘录列表中
-            self.itemArray.append(newItem)
+//            //使用CoreData提供的Item类
+//            let newItem = Item(context: self.context)
+//            newItem.title = textField.text!
+//            //done属性不可为空
+//            newItem.done = false
+//            //在DM中设置了外键，在ViewDidLoad中接收到了Segue传来的selected Category
+//            newItem.parentCategory = self.selectedCategory
+//            //将新增备忘录加入备忘录列表中
+//            self.itemArray.append(newItem)
             self.saveItems()
         }
         //为alert装载一个输入框,并将闭包内输入框状态传至方法内的输入框（引用传递)
@@ -104,52 +104,52 @@ class TodoListViewController: UITableViewController {
     }
     //load Items by passed parameters, simply all-quiried is defult
     //predicate设置为可选值，默认为空
-    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
-        //根据当前目录从数据库取数据
-        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
-        if let addtionalPredicate = predicate {
-            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, addtionalPredicate])
-        }else{
-            request.predicate = categoryPredicate
-        }
-//        let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, predicate])
-//        request.predicate = predicate
-        do{
-            itemArray = try context.fetch(request)
-        }catch {
-            print("error fetch \(error)")
-        }
-        //清理注释的时候误删了！！！
-        tableView.reloadData()
-    }
+//    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
+//        //根据当前目录从数据库取数据
+//        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+//        if let addtionalPredicate = predicate {
+//            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, addtionalPredicate])
+//        }else{
+//            request.predicate = categoryPredicate
+//        }
+////        let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, predicate])
+////        request.predicate = predicate
+//        do{
+//            itemArray = try context.fetch(request)
+//        }catch {
+//            print("error fetch \(error)")
+//        }
+//        //清理注释的时候误删了！！！
+//        tableView.reloadData()
+//    }
 }
 
 //MARK: - 搜索栏
-extension TodoListViewController: UISearchBarDelegate{
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        //建立用于获取数据库Context的Request
-        let request: NSFetchRequest<Item> = Item.fetchRequest()
-        //The method is to search the items by a keyword of title
-        //The content of the searchBar will replace %@
-        let predicate = NSPredicate(format: "title CONTAINS %@", searchBar.text!)
-        request.predicate = predicate
-        //set the principle of sort for request
-        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-        //fetch result form db
-        loadItems(with: request, predicate: predicate)
-        tableView.reloadData()
-    }
-    //show the origin page if nothing in searchBar
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        
-        if searchBar.text?.count == 0 {
-            loadItems()
-            //用户取消输入时，主线程，消除键盘和搜索框光标
-            DispatchQueue.main.async {
-                //取消选中状态的方法，必须放在主线程里执行，否则不生效
-                searchBar.resignFirstResponder()
-            }
-            
-        }
-    }
-}
+//extension TodoListViewController: UISearchBarDelegate{
+//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+//        //建立用于获取数据库Context的Request
+//        let request: NSFetchRequest<Item> = Item.fetchRequest()
+//        //The method is to search the items by a keyword of title
+//        //The content of the searchBar will replace %@
+//        let predicate = NSPredicate(format: "title CONTAINS %@", searchBar.text!)
+//        request.predicate = predicate
+//        //set the principle of sort for request
+//        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+//        //fetch result form db
+//        loadItems(with: request, predicate: predicate)
+//        tableView.reloadData()
+//    }
+//    //show the origin page if nothing in searchBar
+//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+//        
+//        if searchBar.text?.count == 0 {
+//            loadItems()
+//            //用户取消输入时，主线程，消除键盘和搜索框光标
+//            DispatchQueue.main.async {
+//                //取消选中状态的方法，必须放在主线程里执行，否则不生效
+//                searchBar.resignFirstResponder()
+//            }
+//            
+//        }
+//    }
+//}

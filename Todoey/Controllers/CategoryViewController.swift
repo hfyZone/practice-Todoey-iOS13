@@ -7,9 +7,11 @@
 //
 
 import UIKit
-import CoreData
-
+//import CoreData
+import RealmSwift
 class CategoryViewController: UITableViewController {
+    
+    let realm = try! Realm()
     
     var categoryArray = [Category]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -28,11 +30,11 @@ class CategoryViewController: UITableViewController {
         let action = UIAlertAction(title: "增加", style: .default){
             (action) in
             
-            let newCategory = Category(context: self.context)
+            let newCategory = Category()
             newCategory.name = textField.text!
             //将新增备忘录加入备忘录列表中
             self.categoryArray.append(newCategory)
-            self.saveCategories()
+            self.save(category: newCategory)
         }
         //为alert装载一个输入框,并将闭包内输入框状态传至方法内的输入框（引用传递)
         //此方法是在alert的输入框初始化的时候运行，因此用户输入的数据无法获取
@@ -74,21 +76,25 @@ class CategoryViewController: UITableViewController {
         }
     }
     //MARK: - 数据操作
-    func saveCategories(){
+    func save(category:Category){
         do{
-            try context.save()
+            //修改为realm的存储
+            try realm.write{
+                realm.add(category)
+            }
         } catch {
            print("Error saving context \(error)")
         }
         self.tableView.reloadData()
     }
     //load Items by passed parameters, simply all-quiried is defult
-    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
-        do{
-            categoryArray = try context.fetch(request)
-        }catch {
-            print("error fetch \(error)")
-        }
-        tableView.reloadData()
+    func loadCategories() {
+        //let request: NSFetchRequest<Category> = Category.fetchRequest()
+//        do{
+//            categoryArray = try context.fetch(request)
+//        }catch {
+//            print("error fetch \(error)")
+//        }
+//        tableView.reloadData()
     }
 }
