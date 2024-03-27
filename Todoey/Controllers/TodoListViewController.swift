@@ -58,12 +58,18 @@ class TodoListViewController: UITableViewController {
         //context.delete(itemArray[indexPath.row])
         //删除view中的cell元素
         //itemArray.remove(at: indexPath.row)
-        
-        //根据索引确定当前交互的Model数据更改
-        //toDoItems[indexPath.row].done = !toDoItems[indexPath.row].done
-        
-        //用户修改选中状态后同样要更新Items
-        //saveItems()
+        //Realm的更改数据
+        if let item = toDoItems?[indexPath.row]{
+            do{
+                try realm.write{
+                    item.done = !item.done
+                }
+            }catch{
+                print("Error saving status, \(error)")
+            }
+        }
+        tableView.reloadData()
+    
         //设置tv的当前行取消被选中状态，以实现选中动画
         tableView.deselectRow(at: indexPath, animated: true)
     }
