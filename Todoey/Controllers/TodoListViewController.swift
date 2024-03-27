@@ -35,7 +35,9 @@ class TodoListViewController: UITableViewController {
     //根据IndexPath生成cell并返回给TV
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .default, reuseIdentifier: "ToDoItemCell")
+        print(indexPath)
         if let item = toDoItems?[indexPath.row]{
+            print(item)
             //TODO: cell.textLabel已标记弃用，学习UIListContentConfiguration
             cell.textLabel?.text = item.title
             //根据Model状态确定View状态
@@ -61,7 +63,7 @@ class TodoListViewController: UITableViewController {
         //toDoItems[indexPath.row].done = !toDoItems[indexPath.row].done
         
         //用户修改选中状态后同样要更新Items
-        saveItems()
+        //saveItems()
         //设置tv的当前行取消被选中状态，以实现选中动画
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -74,16 +76,20 @@ class TodoListViewController: UITableViewController {
         //新建一个alert的action（按钮），在回调函数中确定用户点击”增加“按钮的时候的行动
         let action = UIAlertAction(title: "增加", style: .default){
             (action) in
-//            //使用CoreData提供的Item类
-//            let newItem = Item(context: self.context)
-//            newItem.title = textField.text!
-//            //done属性不可为空
-//            newItem.done = false
-//            //在DM中设置了外键，在ViewDidLoad中接收到了Segue传来的selected Category
-//            newItem.parentCategory = self.selectedCategory
-//            //将新增备忘录加入备忘录列表中
-//            self.itemArray.append(newItem)
-            self.saveItems()
+            if let currentCategory = self.selectedCategory {
+                do{
+                    try self.realm.write{
+                        let newItem = Item()
+                        newItem.title = textField.text!
+                        //newItem.parentCategory = selectedCategory
+                        //在Realm中直接添加到selectedCategory的itemList里即可
+                        currentCategory.items.append(newItem)
+                    }
+                }catch {
+                    print("Error saving new Item,\(error)")
+                }
+            }
+            self.tableView.reloadData()
         }
         //为alert装载一个输入框,并将闭包内输入框状态传至方法内的输入框（引用传递)
         //此方法是在alert的输入框初始化的时候运行，因此用户输入的数据无法获取
@@ -98,19 +104,10 @@ class TodoListViewController: UITableViewController {
     }
     
     //MARK: - 保存读取数据
-    func saveItems(){
-        do{
-            try context.save()
-        } catch {
-           print("Error saving context \(error)")
-        }
-        //触发tv的数据渲染流程
-        self.tableView.reloadData()
-    }
     //load Items by passed parameters, simply all-quiried is defult
     //predicate设置为可选值，默认为空
     func loadItems() {
-        //itemArray = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
+        toDoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
         tableView.reloadData()
     }
 }
