@@ -62,6 +62,8 @@ class TodoListViewController: UITableViewController {
         if let item = toDoItems?[indexPath.row]{
             do{
                 try realm.write{
+                    //简易实现realm的删除
+                    //realm.delete(item)
                     item.done = !item.done
                 }
             }catch{
