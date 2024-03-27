@@ -12,8 +12,9 @@ import RealmSwift
 class CategoryViewController: UITableViewController {
     
     let realm = try! Realm()
-    
-    var categoryArray = [Category]()
+    //设置为Realm的查询结果容器
+    //关于Optional的unwrap，需要不同地方的配合和程序的逻辑
+    var categories: Results<Category>?
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
@@ -32,8 +33,9 @@ class CategoryViewController: UITableViewController {
             
             let newCategory = Category()
             newCategory.name = textField.text!
+            //不再需要主动给目录列表添加新的实例，因为Realm会自动更新实现了Object的Categor
             //将新增备忘录加入备忘录列表中
-            self.categoryArray.append(newCategory)
+            //self.categories.append(newCategory)
             self.save(category: newCategory)
         }
         //为alert装载一个输入框,并将闭包内输入框状态传至方法内的输入框（引用传递)
@@ -50,13 +52,14 @@ class CategoryViewController: UITableViewController {
     
     //MARK: - TableView 数据源
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categoryArray.count
+        //对Optional的解包，如果为空则值为??后的值
+        return categories?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .default, reuseIdentifier: "categoryCell")
         //TODO: cell.textLabel已标记弃用，学习UIListContentConfiguration
-        cell.textLabel?.text = categoryArray[indexPath.row].name
+        cell.textLabel?.text = categories?[indexPath.row].name ?? "目录名称还未添加"
         
         return cell
     }
@@ -72,7 +75,8 @@ class CategoryViewController: UITableViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let destinationVC = segue.destination as! TodoListViewController
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.selectedCategory = categoryArray[indexPath.row]
+            //selectedCategory是一个Optional，且在赋值时会触发didSet
+            destinationVC.selectedCategory = categories?[indexPath.row]
         }
     }
     //MARK: - 数据操作
@@ -89,12 +93,8 @@ class CategoryViewController: UITableViewController {
     }
     //load Items by passed parameters, simply all-quiried is defult
     func loadCategories() {
-        //let request: NSFetchRequest<Category> = Category.fetchRequest()
-//        do{
-//            categoryArray = try context.fetch(request)
-//        }catch {
-//            print("error fetch \(error)")
-//        }
-//        tableView.reloadData()
+        //load all categories from Realm
+        categories = realm.objects(Category.self)
+        tableView.reloadData()
     }
 }

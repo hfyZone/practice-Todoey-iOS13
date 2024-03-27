@@ -7,15 +7,16 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 class TodoListViewController: UITableViewController {
 
-    var itemArray = [Item]()
+    var toDoItems: Results<Item>?
+    let realm = try! Realm()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     var selectedCategory: Category? {
         //触发当被设置值时
         didSet{
-            //loadItems()
+            loadItems()
         }
     }
     
@@ -29,16 +30,20 @@ class TodoListViewController: UITableViewController {
     //MARK: - TableView的数据源方法
     //给出一个tableView有多少条数据
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return itemArray.count
+        return toDoItems?.count ?? 1
     }
     //根据IndexPath生成cell并返回给TV
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .default, reuseIdentifier: "ToDoItemCell")
-        //TODO: cell.textLabel已标记弃用，学习UIListContentConfiguration
-        cell.textLabel?.text = itemArray[indexPath.row].title
-        //根据Model状态确定View状态
-        cell.accessoryType = itemArray[indexPath.row].done ? .checkmark : .none
-        
+        if let item = toDoItems?[indexPath.row]{
+            //TODO: cell.textLabel已标记弃用，学习UIListContentConfiguration
+            cell.textLabel?.text = item.title
+            //根据Model状态确定View状态
+            cell.accessoryType = item.done ? .checkmark : .none
+        }else{
+            //如果toDoItems为空，在上一个方法会返回1，这个1的内容指定为如下
+            cell.textLabel?.text = "目前未添加备忘录"
+        }
         return cell
     }
     
@@ -53,7 +58,7 @@ class TodoListViewController: UITableViewController {
         //itemArray.remove(at: indexPath.row)
         
         //根据索引确定当前交互的Model数据更改
-        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        //toDoItems[indexPath.row].done = !toDoItems[indexPath.row].done
         
         //用户修改选中状态后同样要更新Items
         saveItems()
@@ -104,24 +109,10 @@ class TodoListViewController: UITableViewController {
     }
     //load Items by passed parameters, simply all-quiried is defult
     //predicate设置为可选值，默认为空
-//    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
-//        //根据当前目录从数据库取数据
-//        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
-//        if let addtionalPredicate = predicate {
-//            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, addtionalPredicate])
-//        }else{
-//            request.predicate = categoryPredicate
-//        }
-////        let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, predicate])
-////        request.predicate = predicate
-//        do{
-//            itemArray = try context.fetch(request)
-//        }catch {
-//            print("error fetch \(error)")
-//        }
-//        //清理注释的时候误删了！！！
-//        tableView.reloadData()
-//    }
+    func loadItems() {
+        //itemArray = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
+        tableView.reloadData()
+    }
 }
 
 //MARK: - 搜索栏
