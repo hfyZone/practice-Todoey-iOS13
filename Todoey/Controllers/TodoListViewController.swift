@@ -35,9 +35,7 @@ class TodoListViewController: UITableViewController {
     //根据IndexPath生成cell并返回给TV
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .default, reuseIdentifier: "ToDoItemCell")
-        print(indexPath)
         if let item = toDoItems?[indexPath.row]{
-            print(item)
             //TODO: cell.textLabel已标记弃用，学习UIListContentConfiguration
             cell.textLabel?.text = item.title
             //根据Model状态确定View状态
@@ -121,31 +119,23 @@ class TodoListViewController: UITableViewController {
 }
 
 //MARK: - 搜索栏
-//extension TodoListViewController: UISearchBarDelegate{
-//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//        //建立用于获取数据库Context的Request
-//        let request: NSFetchRequest<Item> = Item.fetchRequest()
-//        //The method is to search the items by a keyword of title
-//        //The content of the searchBar will replace %@
-//        let predicate = NSPredicate(format: "title CONTAINS %@", searchBar.text!)
-//        request.predicate = predicate
-//        //set the principle of sort for request
-//        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-//        //fetch result form db
-//        loadItems(with: request, predicate: predicate)
-//        tableView.reloadData()
-//    }
-//    //show the origin page if nothing in searchBar
-//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        
-//        if searchBar.text?.count == 0 {
-//            loadItems()
-//            //用户取消输入时，主线程，消除键盘和搜索框光标
-//            DispatchQueue.main.async {
-//                //取消选中状态的方法，必须放在主线程里执行，否则不生效
-//                searchBar.resignFirstResponder()
-//            }
-//            
-//        }
-//    }
-//}
+extension TodoListViewController: UISearchBarDelegate{
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        //在Relam中根据条件查询
+        toDoItems = toDoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: false)
+        tableView.reloadData()
+    }
+    //show the origin page if nothing in searchBar
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        if searchBar.text?.count == 0 {
+            loadItems()
+            //用户取消输入时，主线程，消除键盘和搜索框光标
+            DispatchQueue.main.async {
+                //取消选中状态的方法，必须放在主线程里执行，否则不生效
+                searchBar.resignFirstResponder()
+            }
+            
+        }
+    }
+}
