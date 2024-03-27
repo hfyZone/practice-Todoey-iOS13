@@ -12,7 +12,7 @@ class TodoListViewController: UITableViewController {
 
     var toDoItems: Results<Item>?
     let realm = try! Realm()
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    //let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     var selectedCategory: Category? {
         //触发当被设置值时
         didSet{

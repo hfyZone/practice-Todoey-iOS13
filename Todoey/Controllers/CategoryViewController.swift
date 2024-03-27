@@ -15,7 +15,7 @@ class CategoryViewController: UITableViewController {
     //设置为Realm的查询结果容器
     //关于Optional的unwrap，需要不同地方的配合和程序的逻辑
     var categories: Results<Category>?
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    //let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
