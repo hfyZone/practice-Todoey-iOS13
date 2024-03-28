@@ -8,7 +8,7 @@
 
 import UIKit
 import RealmSwift
-
+import ChameleonFramework
 class CategoryViewController: SwipeTableViewController {
     
     let realm = try! Realm()
@@ -21,6 +21,7 @@ class CategoryViewController: SwipeTableViewController {
         super.viewDidLoad()
         loadCategories()
         
+        tableView.separatorStyle = .none
 
         
     }
@@ -35,6 +36,7 @@ class CategoryViewController: SwipeTableViewController {
             
             let newCategory = Category()
             newCategory.name = textField.text!
+            newCategory.colorHex = UIColor.randomFlat().hexValue()
             //不再需要主动给目录列表添加新的实例，因为Realm会自动更新实现了Object的Categor
             //将新增备忘录加入备忘录列表中
             //self.categories.append(newCategory)
@@ -62,6 +64,9 @@ class CategoryViewController: SwipeTableViewController {
         //从超类中获取cell
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         cell.textLabel?.text = categories?[indexPath.row].name ?? "目录为空"
+        cell.backgroundColor = UIColor(hexString: categories?[indexPath.row].colorHex ?? "FFFFFF")
+        
+        
         return cell
     }
     //MARK: - TableView 交互

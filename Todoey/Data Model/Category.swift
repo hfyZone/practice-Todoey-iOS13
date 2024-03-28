@@ -10,6 +10,7 @@ import Foundation
 import RealmSwift
 class Category: Object {
     @objc dynamic var name: String = ""
+    @objc dynamic var colorHex: String = ""
     //外键,Realm provides the List methord
     let items = List<Item>()
 }
