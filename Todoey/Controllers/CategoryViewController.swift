@@ -7,8 +7,9 @@
 //
 
 import UIKit
-//import CoreData
 import RealmSwift
+import SwipeCellKit
+
 class CategoryViewController: UITableViewController {
     
     let realm = try! Realm()
@@ -20,6 +21,8 @@ class CategoryViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         loadCategories()
+        
+        tableView.rowHeight = 80.0
         
     }
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -57,10 +60,12 @@ class CategoryViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .default, reuseIdentifier: "categoryCell")
+        let cell = tableView.dequeueReusableCell(withIdentifier: "categoryCell", for: indexPath) as! SwipeTableViewCell
+        
+        //let cell = UITableViewCell(style: .default, reuseIdentifier: "categoryCell")
         //TODO: cell.textLabel已标记弃用，学习UIListContentConfiguration
         cell.textLabel?.text = categories?[indexPath.row].name ?? "目录名称还未添加"
-        
+        cell.delegate = self
         return cell
     }
     //MARK: - TableView 交互
@@ -97,4 +102,38 @@ class CategoryViewController: UITableViewController {
         categories = realm.objects(Category.self)
         tableView.reloadData()
     }
+}
+//MARK: - SwipeTableViewCellDelegate，用于cell的滑动动画
+extension CategoryViewController: SwipeTableViewCellDelegate{
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
+        guard orientation == .right else { return nil }
+
+        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
+            // handle action by updating model with deletion
+            if let category = self.categories?[indexPath.row] {
+                do{
+                    try self.realm.write{
+                        self.realm.delete(category)
+                    }
+                }catch {
+                    print("Error deleting Category, \(error)")
+                }
+                //tableView.reloadData()
+            }
+        }
+
+        // customize the action appearance
+        deleteAction.image = UIImage(named: "delete-icon")
+
+        return [deleteAction]
+    }
+    //设置长滑动自动删除
+    func tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
+        var options = SwipeOptions()
+        options.expansionStyle = .destructive
+        return options
+    }
+
+    
+    
 }
