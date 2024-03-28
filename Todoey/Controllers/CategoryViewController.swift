@@ -25,6 +25,11 @@ class CategoryViewController: SwipeTableViewController {
 
         
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        guard let navbar = navigationController?.navigationBar else {fatalError("Navigation controller doesnt exist.")}
+        navbar.backgroundColor = UIColor(hexString: "1D9BF6")
+    }
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
         var textField = UITextField()
@@ -63,8 +68,14 @@ class CategoryViewController: SwipeTableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         //从超类中获取cell
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
-        cell.textLabel?.text = categories?[indexPath.row].name ?? "目录为空"
-        cell.backgroundColor = UIColor(hexString: categories?[indexPath.row].colorHex ?? "FFFFFF")
+        if let category = categories?[indexPath.row] {
+            cell.textLabel?.text = category.name
+            //guard可以保证其后面的语句不会为nil
+            guard let categoryColor = UIColor(hexString: category.colorHex) else {fatalError("categoryColor ERROR")}
+            cell.backgroundColor = UIColor(hexString: category.colorHex)
+            cell.textLabel?.textColor = ContrastColorOf(categoryColor, returnFlat: true)
+        }
+        
         
         
         return cell

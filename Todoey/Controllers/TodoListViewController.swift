@@ -11,6 +11,7 @@ import RealmSwift
 import ChameleonFramework
 class TodoListViewController: SwipeTableViewController {
 
+    @IBOutlet weak var searchBar: UISearchBar!
     var toDoItems: Results<Item>?
     let realm = try! Realm()
     var selectedCategory: Category? {
@@ -26,6 +27,24 @@ class TodoListViewController: SwipeTableViewController {
         //在storyboard连接searchBar和控制器？好像现在xcode自己就做了委托了
         //loadItems()
         tableView.separatorStyle = .none
+        
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        if let color = selectedCategory?.colorHex{
+            title = selectedCategory!.name
+            //保证navigationController?.navigationBar的存在，View在viewDidLoad，只是加载，并未加入到导航条,因此在更晚的方法viewWillAppear中
+            guard let navbar = navigationController?.navigationBar else {fatalError("Navigation controller doesnt exist.")}
+            
+            if let navBarColor = UIColor(hexString: color){
+                navigationController?.navigationBar.barTintColor = navBarColor
+                navbar.tintColor = ContrastColorOf(navBarColor, returnFlat: true)
+                navbar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: ContrastColorOf(navBarColor, returnFlat: true)]
+                //searchBar.barTintColor = navBarColor
+            }
+            
+        }
     }
     
     //MARK: - TableView的数据源方法
