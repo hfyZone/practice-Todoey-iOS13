@@ -8,11 +8,10 @@
 
 import UIKit
 import RealmSwift
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
 
     var toDoItems: Results<Item>?
     let realm = try! Realm()
-    //let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     var selectedCategory: Category? {
         //触发当被设置值时
         didSet{
@@ -34,7 +33,7 @@ class TodoListViewController: UITableViewController {
     }
     //根据IndexPath生成cell并返回给TV
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .default, reuseIdentifier: "ToDoItemCell")
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         if let item = toDoItems?[indexPath.row]{
             //TODO: cell.textLabel已标记弃用，学习UIListContentConfiguration
             cell.textLabel?.text = item.title
@@ -51,17 +50,10 @@ class TodoListViewController: UITableViewController {
     //TV的用户交互row委托方法
     //当用户对tableView的indexPath的cell进行点击操作触发的方法
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //TODO: 删除呢？咋没后续了一会看一下。
-        //删除数据
-        //context.delete(itemArray[indexPath.row])
-        //删除view中的cell元素
-        //itemArray.remove(at: indexPath.row)
         //Realm的更改数据
         if let item = toDoItems?[indexPath.row]{
             do{
                 try realm.write{
-                    //简易实现realm的删除
-                    //realm.delete(item)
                     item.done = !item.done
                 }
             }catch{
@@ -115,6 +107,18 @@ class TodoListViewController: UITableViewController {
     func loadItems() {
         toDoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
         tableView.reloadData()
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        if let item = toDoItems?[indexPath.row]{
+            do{
+                try realm.write{
+                    realm.delete(item)
+                }
+            }catch{
+                print("Error deleting status, \(error)")
+            }
+        }
     }
 }
 
