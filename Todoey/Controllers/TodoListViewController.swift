@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 class TodoListViewController: SwipeTableViewController {
 
     var toDoItems: Results<Item>?
@@ -24,6 +25,7 @@ class TodoListViewController: SwipeTableViewController {
 //        let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
         //在storyboard连接searchBar和控制器？好像现在xcode自己就做了委托了
         //loadItems()
+        tableView.separatorStyle = .none
     }
     
     //MARK: - TableView的数据源方法
@@ -39,6 +41,12 @@ class TodoListViewController: SwipeTableViewController {
             cell.textLabel?.text = item.title
             //根据Model状态确定View状态
             cell.accessoryType = item.done ? .checkmark : .none
+            //为了防止if let太多层，使用?来使后面的方法在前者为空的时候不去执行
+            if let color = UIColor(hexString: selectedCategory!.colorHex)? .darken(byPercentage:CGFloat(indexPath.row)/CGFloat(toDoItems!.count)) {
+                cell.backgroundColor = color
+                cell.textLabel?.textColor = ContrastColorOf(color, returnFlat: true)
+            }
+            
         }else{
             //如果toDoItems为空，在上一个方法会返回1，这个1的内容指定为如下
             cell.textLabel?.text = "目前未添加备忘录"
